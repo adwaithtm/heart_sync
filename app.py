@@ -1,36 +1,43 @@
-import tkinter as tk
-from tkinter import messagebox
-import random
+from flask import Flask, render_template_string
+import os
 
-def move_button(event):
-    # This makes the "No" button jump to a random spot
-    new_x = random.randint(0, window.winfo_width() - no_button.winfo_width())
-    new_y = random.randint(0, window.winfo_height() - no_button.winfo_height())
-    no_button.place(x=new_x, y=new_y)
+app = Flask(__name__)
 
-def accepted():
-    messagebox.showinfo("Success!", "Excellent choice! Date.exe is now running. ❤️")
-    window.destroy()
+HTML = """
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Incoming Request...</title>
+  <style>
+    body { background:#ffe6e6; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:Arial; }
+    h1 { color:#ff4d6d; }
+    #yes { background:#ff4d6d; color:white; padding:10px 20px; border:none; border-radius:6px; font-size:16px; }
+    #no { position:absolute; padding:10px 20px; font-size:16px; }
+  </style>
+</head>
+<body>
+  <h1>Will you be my valentine?</h1>
+  <button id="yes" onclick="alert('Excellent choice! ❤️')">YES</button>
+  <button id="no" onmouseover="moveNo()">NO</button>
 
-# Setup the window
-window = tk.Tk()
-window.title("Incoming Request...")
-window.geometry("400x300")
-window.configure(bg="#ffe6e6")
+  <script>
+    function moveNo() {
+      const no = document.getElementById("no");
+      const x = Math.random() * (window.innerWidth - 80);
+      const y = Math.random() * (window.innerHeight - 40);
+      no.style.left = x + "px";
+      no.style.top = y + "px";
+    }
+  </script>
+</body>
+</html>
+"""
 
-# The Message
-label = tk.Label(window, text="Will you be my valentine?", 
-                 font=("Helvetica", 16, "bold"), bg="#ffe6e6", fg="#ff4d6d")
-label.pack(pady=50)
+@app.route("/")
+def home():
+    return render_template_string(HTML)
 
-# The "Yes" Button
-yes_button = tk.Button(window, text="YES", font=("Helvetica", 12), 
-                       command=accepted, bg="#ff4d6d", fg="white", width=10)
-yes_button.place(x=100, y=150)
-
-# The "No" Button (The prank)
-no_button = tk.Button(window, text="NO", font=("Helvetica", 12), width=10)
-no_button.place(x=220, y=150)
-no_button.bind("<Enter>", move_button) # This triggers when the mouse enters the button area
-
-window.mainloop()
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
